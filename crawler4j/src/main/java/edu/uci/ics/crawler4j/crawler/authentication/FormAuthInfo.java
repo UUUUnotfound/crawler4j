@@ -1,8 +1,12 @@
 package edu.uci.ics.crawler4j.crawler.authentication;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 
 import javax.swing.text.html.FormSubmitEvent.MethodType;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 /**
  * Created by Avi Hayun on 11/25/2014.
@@ -18,8 +22,25 @@ public class FormAuthInfo extends AuthInfo {
 
     private String usernameFormStr;
     private String passwordFormStr;
+	private ArrayList<NameValuePair> nvps;
 
-    /**
+	//Navex 
+    public ArrayList<NameValuePair> getNvps() {
+		return nvps;
+	}
+
+	public void setNvps(ArrayList<NameValuePair> nvps) {
+		this.nvps = nvps;
+	}
+	
+	public void addNvps(BasicNameValuePair nvCSRF) {
+		if (nvps == null)
+			this.nvps = new ArrayList<NameValuePair>();
+		this.nvps.add(nvCSRF);
+		
+	}
+
+	/**
      * Constructor
      *
      * @param username Username to login with
@@ -31,12 +52,13 @@ public class FormAuthInfo extends AuthInfo {
      * @throws MalformedURLException Make sure your URL is valid
      */
     public FormAuthInfo(String username, String password, String loginUrl, String usernameFormStr,
-                        String passwordFormStr) throws MalformedURLException {
+                        String passwordFormStr, ArrayList<NameValuePair> others) throws MalformedURLException {
         super(AuthenticationType.FORM_AUTHENTICATION, MethodType.POST, loginUrl, username,
               password);
 
         this.usernameFormStr = usernameFormStr;
         this.passwordFormStr = passwordFormStr;
+        this.nvps = others;
     }
 
     /**
@@ -66,4 +88,6 @@ public class FormAuthInfo extends AuthInfo {
     public void setPasswordFormStr(String passwordFormStr) {
         this.passwordFormStr = passwordFormStr;
     }
+
+	
 }

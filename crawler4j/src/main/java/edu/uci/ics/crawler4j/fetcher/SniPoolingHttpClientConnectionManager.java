@@ -6,7 +6,6 @@ import javax.net.ssl.SSLProtocolException;
 
 import org.apache.http.HttpClientConnection;
 import org.apache.http.config.Registry;
-import org.apache.http.conn.DnsResolver;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -35,11 +34,6 @@ public class SniPoolingHttpClientConnectionManager extends PoolingHttpClientConn
     public SniPoolingHttpClientConnectionManager(
         Registry<ConnectionSocketFactory> socketFactoryRegistry) {
         super(socketFactoryRegistry);
-    }
-
-    public SniPoolingHttpClientConnectionManager(
-            Registry<ConnectionSocketFactory> socketFactoryRegistry, DnsResolver dnsResolver) {
-        super(socketFactoryRegistry, dnsResolver);
     }
 
     @Override

@@ -23,8 +23,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -42,10 +40,6 @@ public class URLCanonicalizer {
     }
 
     public static String getCanonicalURL(String href, String context) {
-        return getCanonicalURL(href, context, StandardCharsets.UTF_8);
-    }
-
-    public static String getCanonicalURL(String href, String context, Charset charset) {
 
         try {
             URL canonicalURL =
@@ -64,9 +58,7 @@ public class URLCanonicalizer {
        * ".", and no segments equal to ".." that are preceded by a segment
        * not equal to "..".
        */
-            path = new URI(path.replace("\\", "/")
-                    .replace(String.valueOf((char)12288), "%E3%80%80")
-                    .replace(String.valueOf((char)32), "%20")).normalize().toString();
+            path = new URI(path.replace("\\", "/")).normalize().toString();
 
             int idx = path.indexOf("//");
             while (idx >= 0) {
@@ -83,7 +75,7 @@ public class URLCanonicalizer {
             Map<String, String> params = createParameterMap(canonicalURL.getQuery());
             final String queryString;
             if ((params != null) && !params.isEmpty()) {
-                String canonicalParams = canonicalize(params, charset);
+                String canonicalParams = canonicalize(params);
                 queryString = (canonicalParams.isEmpty() ? "" : ("?" + canonicalParams));
             } else {
                 queryString = "";
@@ -151,11 +143,9 @@ public class URLCanonicalizer {
      *
      * @param paramsMap
      *            Parameter map whose name-value pairs are in order of insertion.
-     * @param charset
-     *            Charset of html page
      * @return Canonical form of query string.
      */
-    private static String canonicalize(Map<String, String> paramsMap, Charset charset) {
+    private static String canonicalize(Map<String, String> paramsMap) {
         if ((paramsMap == null) || paramsMap.isEmpty()) {
             return "";
         }
@@ -169,27 +159,36 @@ public class URLCanonicalizer {
             if (sb.length() > 0) {
                 sb.append('&');
             }
-            sb.append(percentEncodeRfc3986(pair.getKey(), charset));
+            sb.append(percentEncodeRfc3986(pair.getKey()));
             if (!pair.getValue().isEmpty()) {
                 sb.append('=');
-                sb.append(percentEncodeRfc3986(pair.getValue(), charset));
+                sb.append(percentEncodeRfc3986(pair.getValue()));
             }
         }
         return sb.toString();
     }
 
-    private static String normalizePath(final String path) {
-        return path.replace("%7E", "~").replace(" ", "%20");
-    }
-
-    private static String percentEncodeRfc3986(String string, Charset charset) {
+    /**
+     * Percent-encode values according the RFC 3986. The built-in Java
+     * URLEncoder does not encode according to the RFC, so we make the extra
+     * replacements.
+     *
+     * @param string
+     *            Decoded string.
+     * @return Encoded string per RFC 3986.
+     */
+    private static String percentEncodeRfc3986(String string) {
         try {
             string = string.replace("+", "%2B");
             string = URLDecoder.decode(string, "UTF-8");
-            string = URLEncoder.encode(string, charset.name());
+            string = URLEncoder.encode(string, "UTF-8");
             return string.replace("+", "%20").replace("*", "%2A").replace("%7E", "~");
         } catch (Exception e) {
             return string;
         }
+    }
+
+    private static String normalizePath(final String path) {
+        return path.replace("%7E", "~").replace(" ", "%20");
     }
 }

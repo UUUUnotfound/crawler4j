@@ -20,7 +20,17 @@ package edu.uci.ics.crawler4j.parser;
 import java.util.Map;
 import java.util.Set;
 
+import navex.HTMLForm;
 import edu.uci.ics.crawler4j.url.WebURL;
+import org.htmlparser.Node;
+
+
+/**
+ * @modified by Abeer Alhuzali
+ * 
+ * For more information, please read "NAVEX: Precise and Scalable Exploit Generation for Dynamic Web Applications"
+ *
+ */
 
 public class HtmlParseData implements ParseData {
 
@@ -30,8 +40,28 @@ public class HtmlParseData implements ParseData {
     private Map<String, String> metaTags;
 
     private Set<WebURL> outgoingUrls;
-    private String contentCharset;
+    
+    //Navex 
+    private Set<HTMLForm> forms;
+    
+    //Navex 
+ // all Script tags embedded by this page
+ 	private Node[] scripts;
 
+ 	public Node[] getScripts() {
+		return scripts;
+	}
+
+	public void setScripts(Node[] scripts) {
+		this.scripts = scripts;
+	}
+
+	// JavaScript common to all forms
+ 	// Type of nodes handled:
+ 	// <script> ... inlined ... </script>
+ 	// <script src=URI></script>
+ 	private String commonJS;
+    
     public String getHtml() {
         return html;
     }
@@ -64,10 +94,6 @@ public class HtmlParseData implements ParseData {
         this.metaTags = metaTags;
     }
 
-    public String getMetaTagValue(String metaTag) {
-        return metaTags.getOrDefault(metaTag, "");
-    }
-
     @Override
     public Set<WebURL> getOutgoingUrls() {
         return outgoingUrls;
@@ -83,11 +109,11 @@ public class HtmlParseData implements ParseData {
         return text;
     }
 
-    public void setContentCharset(String contentCharset) {
-        this.contentCharset = contentCharset;
-    }
+	public Set<HTMLForm> getForms() {
+		return forms;
+	}
 
-    public String getContentCharset() {
-        return contentCharset;
-    }
+	public void setForms(Set<HTMLForm> forms) {
+		this.forms = forms;
+	}
 }

@@ -20,16 +20,16 @@ package edu.uci.ics.crawler4j.crawler;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
+
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.frontier.DocIDServer;
 import edu.uci.ics.crawler4j.frontier.Frontier;
-import edu.uci.ics.crawler4j.parser.Parser;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import edu.uci.ics.crawler4j.url.TLDList;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
@@ -42,10 +42,9 @@ import edu.uci.ics.crawler4j.util.IO;
  *
  * @author Yasser Ganjisaffar
  */
-public class CrawlController {
+public class CrawlController extends Configurable {
 
     static final Logger logger = LoggerFactory.getLogger(CrawlController.class);
-    private final CrawlConfig config;
 
     /**
      * The 'customData' object can be used for passing custom crawl-related
@@ -78,18 +77,11 @@ public class CrawlController {
     protected final Object waitingLock = new Object();
     protected final Environment env;
 
-    protected Parser parser;
-
     public CrawlController(CrawlConfig config, PageFetcher pageFetcher,
                            RobotstxtServer robotstxtServer) throws Exception {
-        this(config, pageFetcher, new Parser(config), robotstxtServer);
-    }
+        super(config);
 
-    public CrawlController(CrawlConfig config, PageFetcher pageFetcher, Parser parser,
-                           RobotstxtServer robotstxtServer) throws Exception {
         config.validate();
-        this.config = config;
-
         File folder = new File(config.getCrawlStorageFolder());
         if (!folder.exists()) {
             if (folder.mkdirs()) {
@@ -109,7 +101,6 @@ public class CrawlController {
         envConfig.setAllowCreate(true);
         envConfig.setTransactional(resumable);
         envConfig.setLocking(resumable);
-        envConfig.setLockTimeout(config.getDbLockTimeout(), TimeUnit.MILLISECONDS);
 
         File envHome = new File(config.getCrawlStorageFolder() + "/frontier");
         if (!envHome.exists()) {
@@ -132,15 +123,10 @@ public class CrawlController {
         frontier = new Frontier(env, config);
 
         this.pageFetcher = pageFetcher;
-        this.parser = parser;
         this.robotstxtServer = robotstxtServer;
 
         finished = false;
         shuttingDown = false;
-    }
-
-    public Parser getParser() {
-        return parser;
     }
 
     public interface WebCrawlerFactory<T extends WebCrawler> {
@@ -245,6 +231,8 @@ public class CrawlController {
             }
 
             final CrawlController controller = this;
+            final CrawlConfig config = this.getConfig();
+
             Thread monitorThread = new Thread(new Runnable() {
 
                 @Override
@@ -440,6 +428,9 @@ public class CrawlController {
             } else {
                 try {
                     docIdServer.addUrlAndDocId(canonicalUrl, docId);
+                    //Abeer
+                   // DocIDServer.setSavedLastDocID(docId);
+                    
                 } catch (Exception e) {
                     logger.error("Could not add seed: {}", e.getMessage());
                 }
@@ -519,21 +510,10 @@ public class CrawlController {
         this.docIdServer = docIdServer;
     }
 
-    /**
-     * @deprecated implements a factory {@link WebCrawlerFactory} and inject your cutom data as
-     * shown <a href="https://github.com/yasserg/crawler4j#using-a-factory">here</a> .
-     */
-    @Deprecated
     public Object getCustomData() {
         return customData;
     }
 
-    /**
-     * @deprecated implements a factory {@link WebCrawlerFactory} and inject your cutom data as
-     * shown <a href="https://github.com/yasserg/crawler4j#using-a-factory">here</a> .
-     */
-
-    @Deprecated
     public void setCustomData(Object customData) {
         this.customData = customData;
     }
@@ -556,9 +536,5 @@ public class CrawlController {
         this.shuttingDown = true;
         pageFetcher.shutDown();
         frontier.finish();
-    }
-
-    public CrawlConfig getConfig() {
-        return config;
     }
 }

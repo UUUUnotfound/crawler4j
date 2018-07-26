@@ -19,7 +19,6 @@ package edu.uci.ics.crawler4j.robotstxt;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -96,9 +95,7 @@ public class RobotstxtParser {
             }
         }
 
-        if (Objects.nonNull(uaDirectives)) {
-            directives.addDirectives(uaDirectives);
-        }
+        directives.addDirectives(uaDirectives);
         return directives;
     }
 }

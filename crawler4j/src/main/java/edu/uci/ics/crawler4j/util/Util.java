@@ -17,6 +17,8 @@
 
 package edu.uci.ics.crawler4j.util;
 
+import java.util.ArrayList;
+
 /**
  * @author Yasser Ganjisaffar
  */
@@ -78,5 +80,8 @@ public class Util {
 
         return typeStr.contains("text") && !typeStr.contains("html");
     }
+    
+    
+    
 
 }

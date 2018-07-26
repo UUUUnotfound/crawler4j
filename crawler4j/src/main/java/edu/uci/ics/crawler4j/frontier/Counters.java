@@ -32,13 +32,14 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.OperationStatus;
 import com.sleepycat.je.Transaction;
 
+import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.util.Util;
 
 /**
  * @author Yasser Ganjisaffar
  */
-public class Counters {
+public class Counters extends Configurable {
     private static final Logger logger = LoggerFactory.getLogger(Counters.class);
 
     public static class ReservedCounterNames {
@@ -55,6 +56,8 @@ public class Counters {
     protected Map<String, Long> counterValues;
 
     public Counters(Environment env, CrawlConfig config) {
+        super(config);
+
         this.env = env;
         this.counterValues = new HashMap<>();
 
